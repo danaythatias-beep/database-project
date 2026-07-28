@@ -1,0 +1,699 @@
+{
+  "datasets": [
+    {
+      "name": "7dfba8e0",
+      "displayName": "Portfolio Quality Distribution by OJK Rating",
+      "queryLines": [
+        "\n",
+        "SELECT \n",
+        "  `kualitas_ojk_bulan_ini`,\n",
+        "  COUNT(*) as loan_count,\n",
+        "  SUM(`os_total`) as outstanding_amount,\n",
+        "  ROUND(COUNT(*) * 100.0 / SUM(COUNT(*)) OVER (), 2) as pct_of_loans\n",
+        "FROM read_files('/Volumes/__databricks_internal_catalog_genie_files_7474652793626715/01f13e72d2d21a11adaa6f6502700987/76897870652803-01f13e72d2d21a11adaa6f6502700987/b2fc6917-a45c-47fd-a435-6286c6104aae', dateFormat => \"yyyy-MM-dd\", delimiter => \",\", escape => \"\\\"\", format => \"csv\", header => \"true\", ignoreLeadingWhiteSpace => \"true\", ignoreTrailingWhiteSpace => \"true\", inferColumnTypes => \"true\", mergeSchema => \"true\", multiLine => \"true\", schemaEvolutionMode => \"none\", schemaHints => \"`regional` string, `area_id` integer, `branch_id` integer, `area` string, `branch` string, `bp` string, `nama_bp_uk` string, `majelis` string, `borrower_id` integer, `nama_mitra` string, `loan_id` integer, `tanggal_disbursement` date, `plafond` integer, `reason_high_risk` string, `angsuran_minggu_berjalan` integer, `tenor` integer, `usia_loan` integer, `status_par` integer, `total_par` integer, `dpd` integer, `jumlah_tunggakan` integer, `jumlah_minggu_angsuran` integer, `jadwal_pelayanan` string, `os_total` integer, `os_lancar` integer, `hadir` integer, `tidak_hadir` integer, `tanggal_first_par` string, `tanggal_terakhir_par` string, `loan_cycle` integer, `status_par_last_month` string, `angsuran_per_minggu` integer, `angsuran_pokok` integer, `angsuran_profit` integer, `tanggal_terakhir_bayar` date, `last_partial_payment_date` string, `last_partial_payment_amount` integer, `jumlah_saldo_partial` integer, `sisa_frequency_bayar_lebih` integer, `saldo_bayar_lebih` integer, `no_telpon_mitra` string, `alamat_mitra` string, `kualitas_ojk_bulan_ini` string, `kualitas_ojk_bulan_lalu` string, `last_presence` string, `link_koordinat` string, `nomor_hp_afin` string, `tanggal_register_afin` date, `status_mitra` string\", skipRows => \"0\") AS portfolio_data\n",
+        "WHERE `kualitas_ojk_bulan_ini` IS NOT NULL\n",
+        "GROUP BY `kualitas_ojk_bulan_ini`\n",
+        "ORDER BY `kualitas_ojk_bulan_ini`\n"
+      ]
+    },
+    {
+      "name": "8abdbdbc",
+      "displayName": "Key Portfolio Metrics Summary",
+      "queryLines": [
+        "\n",
+        "SELECT \n",
+        "  'Total Loans' as metric,\n",
+        "  2453 as value,\n",
+        "  '' as unit\n",
+        "UNION ALL\n",
+        "SELECT \n",
+        "  'Total Disbursed',\n",
+        "  16615000000,\n",
+        "  'IDR'\n",
+        "UNION ALL\n",
+        "SELECT \n",
+        "  'Total Outstanding',\n",
+        "  8022223568,\n",
+        "  'IDR'\n",
+        "UNION ALL\n",
+        "SELECT \n",
+        "  'PAR Rate',\n",
+        "  57.96,\n",
+        "  '%'\n",
+        "UNION ALL\n",
+        "SELECT \n",
+        "  'Avg Loan Size',\n",
+        "  6773339,\n",
+        "  'IDR'\n",
+        "UNION ALL\n",
+        "SELECT \n",
+        "  'Non-Performing Loans',\n",
+        "  1584,\n",
+        "  ''\n"
+      ]
+    },
+    {
+      "name": "dcf59d71",
+      "displayName": "Loan Distribution by Days Past Due (DPD)",
+      "queryLines": [
+        "\n",
+        "SELECT \n",
+        "  CASE \n",
+        "    WHEN `dpd` = 0 THEN 'Current'\n",
+        "    WHEN `dpd` BETWEEN 1 AND 30 THEN '1-30 DPD'\n",
+        "    WHEN `dpd` BETWEEN 31 AND 90 THEN '31-90 DPD'\n",
+        "    ELSE '90+ DPD'\n",
+        "  END as dpd_bucket,\n",
+        "  COUNT(*) as loan_count,\n",
+        "  SUM(`os_total`) as outstanding_amount\n",
+        "FROM read_files('/Volumes/__databricks_internal_catalog_genie_files_7474652793626715/01f13e72d2d21a11adaa6f6502700987/76897870652803-01f13e72d2d21a11adaa6f6502700987/b2fc6917-a45c-47fd-a435-6286c6104aae', dateFormat => \"yyyy-MM-dd\", delimiter => \",\", escape => \"\\\"\", format => \"csv\", header => \"true\", ignoreLeadingWhiteSpace => \"true\", ignoreTrailingWhiteSpace => \"true\", inferColumnTypes => \"true\", mergeSchema => \"true\", multiLine => \"true\", schemaEvolutionMode => \"none\", schemaHints => \"`regional` string, `area_id` integer, `branch_id` integer, `area` string, `branch` string, `bp` string, `nama_bp_uk` string, `majelis` string, `borrower_id` integer, `nama_mitra` string, `loan_id` integer, `tanggal_disbursement` date, `plafond` integer, `reason_high_risk` string, `angsuran_minggu_berjalan` integer, `tenor` integer, `usia_loan` integer, `status_par` integer, `total_par` integer, `dpd` integer, `jumlah_tunggakan` integer, `jumlah_minggu_angsuran` integer, `jadwal_pelayanan` string, `os_total` integer, `os_lancar` integer, `hadir` integer, `tidak_hadir` integer, `tanggal_first_par` string, `tanggal_terakhir_par` string, `loan_cycle` integer, `status_par_last_month` string, `angsuran_per_minggu` integer, `angsuran_pokok` integer, `angsuran_profit` integer, `tanggal_terakhir_bayar` date, `last_partial_payment_date` string, `last_partial_payment_amount` integer, `jumlah_saldo_partial` integer, `sisa_frequency_bayar_lebih` integer, `saldo_bayar_lebih` integer, `no_telpon_mitra` string, `alamat_mitra` string, `kualitas_ojk_bulan_ini` string, `kualitas_ojk_bulan_lalu` string, `last_presence` string, `link_koordinat` string, `nomor_hp_afin` string, `tanggal_register_afin` date, `status_mitra` string\", skipRows => \"0\") AS portfolio_data\n",
+        "GROUP BY \n",
+        "  CASE \n",
+        "    WHEN `dpd` = 0 THEN 'Current'\n",
+        "    WHEN `dpd` BETWEEN 1 AND 30 THEN '1-30 DPD'\n",
+        "    WHEN `dpd` BETWEEN 31 AND 90 THEN '31-90 DPD'\n",
+        "    ELSE '90+ DPD'\n",
+        "  END\n",
+        "ORDER BY \n",
+        "  CASE \n",
+        "    WHEN dpd_bucket = 'Current' THEN 1\n",
+        "    WHEN dpd_bucket = '1-30 DPD' THEN 2\n",
+        "    WHEN dpd_bucket = '31-90 DPD' THEN 3\n",
+        "    ELSE 4\n",
+        "  END\n"
+      ]
+    },
+    {
+      "name": "8a1bce2a",
+      "displayName": "Monthly Disbursement Trends",
+      "queryLines": [
+        "\n",
+        "SELECT \n",
+        "  DATE_TRUNC('month', `tanggal_disbursement`) as disbursement_month,\n",
+        "  COUNT(*) as loans_disbursed,\n",
+        "  SUM(`plafond`) as total_disbursed,\n",
+        "  AVG(`plafond`) as avg_loan_size\n",
+        "FROM read_files('/Volumes/__databricks_internal_catalog_genie_files_7474652793626715/01f13e72d2d21a11adaa6f6502700987/76897870652803-01f13e72d2d21a11adaa6f6502700987/b2fc6917-a45c-47fd-a435-6286c6104aae', dateFormat => \"yyyy-MM-dd\", delimiter => \",\", escape => \"\\\"\", format => \"csv\", header => \"true\", ignoreLeadingWhiteSpace => \"true\", ignoreTrailingWhiteSpace => \"true\", inferColumnTypes => \"true\", mergeSchema => \"true\", multiLine => \"true\", schemaEvolutionMode => \"none\", schemaHints => \"`regional` string, `area_id` integer, `branch_id` integer, `area` string, `branch` string, `bp` string, `nama_bp_uk` string, `majelis` string, `borrower_id` integer, `nama_mitra` string, `loan_id` integer, `tanggal_disbursement` date, `plafond` integer, `reason_high_risk` string, `angsuran_minggu_berjalan` integer, `tenor` integer, `usia_loan` integer, `status_par` integer, `total_par` integer, `dpd` integer, `jumlah_tunggakan` integer, `jumlah_minggu_angsuran` integer, `jadwal_pelayanan` string, `os_total` integer, `os_lancar` integer, `hadir` integer, `tidak_hadir` integer, `tanggal_first_par` string, `tanggal_terakhir_par` string, `loan_cycle` integer, `status_par_last_month` string, `angsuran_per_minggu` integer, `angsuran_pokok` integer, `angsuran_profit` integer, `tanggal_terakhir_bayar` date, `last_partial_payment_date` string, `last_partial_payment_amount` integer, `jumlah_saldo_partial` integer, `sisa_frequency_bayar_lebih` integer, `saldo_bayar_lebih` integer, `no_telpon_mitra` string, `alamat_mitra` string, `kualitas_ojk_bulan_ini` string, `kualitas_ojk_bulan_lalu` string, `last_presence` string, `link_koordinat` string, `nomor_hp_afin` string, `tanggal_register_afin` date, `status_mitra` string\", skipRows => \"0\") AS portfolio_data\n",
+        "WHERE `tanggal_disbursement` IS NOT NULL\n",
+        "GROUP BY DATE_TRUNC('month', `tanggal_disbursement`)\n",
+        "ORDER BY disbursement_month\n"
+      ]
+    },
+    {
+      "name": "123f175a",
+      "displayName": "Loan Performance by Cycle",
+      "queryLines": [
+        "\n",
+        "SELECT \n",
+        "  `loan_cycle`,\n",
+        "  COUNT(*) as loan_count,\n",
+        "  SUM(`plafond`) as total_disbursed,\n",
+        "  AVG(`plafond`) as avg_loan_size,\n",
+        "  COUNT(CASE WHEN `status_par` > 0 THEN 1 END) as par_loans,\n",
+        "  ROUND(COUNT(CASE WHEN `status_par` > 0 THEN 1 END) * 100.0 / COUNT(*), 2) as par_rate\n",
+        "FROM read_files('/Volumes/__databricks_internal_catalog_genie_files_7474652793626715/01f13e72d2d21a11adaa6f6502700987/76897870652803-01f13e72d2d21a11adaa6f6502700987/b2fc6917-a45c-47fd-a435-6286c6104aae', dateFormat => \"yyyy-MM-dd\", delimiter => \",\", escape => \"\\\"\", format => \"csv\", header => \"true\", ignoreLeadingWhiteSpace => \"true\", ignoreTrailingWhiteSpace => \"true\", inferColumnTypes => \"true\", mergeSchema => \"true\", multiLine => \"true\", schemaEvolutionMode => \"none\", schemaHints => \"`regional` string, `area_id` integer, `branch_id` integer, `area` string, `branch` string, `bp` string, `nama_bp_uk` string, `majelis` string, `borrower_id` integer, `nama_mitra` string, `loan_id` integer, `tanggal_disbursement` date, `plafond` integer, `reason_high_risk` string, `angsuran_minggu_berjalan` integer, `tenor` integer, `usia_loan` integer, `status_par` integer, `total_par` integer, `dpd` integer, `jumlah_tunggakan` integer, `jumlah_minggu_angsuran` integer, `jadwal_pelayanan` string, `os_total` integer, `os_lancar` integer, `hadir` integer, `tidak_hadir` integer, `tanggal_first_par` string, `tanggal_terakhir_par` string, `loan_cycle` integer, `status_par_last_month` string, `angsuran_per_minggu` integer, `angsuran_pokok` integer, `angsuran_profit` integer, `tanggal_terakhir_bayar` date, `last_partial_payment_date` string, `last_partial_payment_amount` integer, `jumlah_saldo_partial` integer, `sisa_frequency_bayar_lebih` integer, `saldo_bayar_lebih` integer, `no_telpon_mitra` string, `alamat_mitra` string, `kualitas_ojk_bulan_ini` string, `kualitas_ojk_bulan_lalu` string, `last_presence` string, `link_koordinat` string, `nomor_hp_afin` string, `tanggal_register_afin` date, `status_mitra` string\", skipRows => \"0\") AS portfolio_data\n",
+        "WHERE `loan_cycle` IS NOT NULL\n",
+        "GROUP BY `loan_cycle`\n",
+        "ORDER BY `loan_cycle`\n"
+      ]
+    },
+    {
+      "name": "8bbd1fce",
+      "displayName": "Loan Distribution by Days Past Due (DPD)",
+      "queryLines": [
+        "\n",
+        "SELECT \n",
+        "  CASE \n",
+        "    WHEN `dpd` = 0 THEN 'Current'\n",
+        "    WHEN `dpd` BETWEEN 1 AND 30 THEN '1-30 DPD'\n",
+        "    WHEN `dpd` BETWEEN 31 AND 90 THEN '31-90 DPD'\n",
+        "    ELSE '90+ DPD'\n",
+        "  END as dpd_bucket,\n",
+        "  COUNT(*) as loan_count,\n",
+        "  SUM(`os_total`) as outstanding_amount\n",
+        "FROM read_files('/Volumes/__databricks_internal_catalog_genie_files_7474652793626715/01f13e72d2d21a11adaa6f6502700987/76897870652803-01f13e72d2d21a11adaa6f6502700987/b2fc6917-a45c-47fd-a435-6286c6104aae', dateFormat => \"yyyy-MM-dd\", delimiter => \",\", escape => \"\\\"\", format => \"csv\", header => \"true\", ignoreLeadingWhiteSpace => \"true\", ignoreTrailingWhiteSpace => \"true\", inferColumnTypes => \"true\", mergeSchema => \"true\", multiLine => \"true\", schemaEvolutionMode => \"none\", schemaHints => \"`regional` string, `area_id` integer, `branch_id` integer, `area` string, `branch` string, `bp` string, `nama_bp_uk` string, `majelis` string, `borrower_id` integer, `nama_mitra` string, `loan_id` integer, `tanggal_disbursement` date, `plafond` integer, `reason_high_risk` string, `angsuran_minggu_berjalan` integer, `tenor` integer, `usia_loan` integer, `status_par` integer, `total_par` integer, `dpd` integer, `jumlah_tunggakan` integer, `jumlah_minggu_angsuran` integer, `jadwal_pelayanan` string, `os_total` integer, `os_lancar` integer, `hadir` integer, `tidak_hadir` integer, `tanggal_first_par` string, `tanggal_terakhir_par` string, `loan_cycle` integer, `status_par_last_month` string, `angsuran_per_minggu` integer, `angsuran_pokok` integer, `angsuran_profit` integer, `tanggal_terakhir_bayar` date, `last_partial_payment_date` string, `last_partial_payment_amount` integer, `jumlah_saldo_partial` integer, `sisa_frequency_bayar_lebih` integer, `saldo_bayar_lebih` integer, `no_telpon_mitra` string, `alamat_mitra` string, `kualitas_ojk_bulan_ini` string, `kualitas_ojk_bulan_lalu` string, `last_presence` string, `link_koordinat` string, `nomor_hp_afin` string, `tanggal_register_afin` date, `status_mitra` string\", skipRows => \"0\") AS portfolio_data\n",
+        "GROUP BY \n",
+        "  CASE \n",
+        "    WHEN `dpd` = 0 THEN 'Current'\n",
+        "    WHEN `dpd` BETWEEN 1 AND 30 THEN '1-30 DPD'\n",
+        "    WHEN `dpd` BETWEEN 31 AND 90 THEN '31-90 DPD'\n",
+        "    ELSE '90+ DPD'\n",
+        "  END\n",
+        "ORDER BY \n",
+        "  CASE \n",
+        "    WHEN dpd_bucket = 'Current' THEN 1\n",
+        "    WHEN dpd_bucket = '1-30 DPD' THEN 2\n",
+        "    WHEN dpd_bucket = '31-90 DPD' THEN 3\n",
+        "    ELSE 4\n",
+        "  END\n"
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "name": "LoansDashboard",
+      "displayName": "Main",
+      "layout": [
+        {
+          "widget": {
+            "name": "4850338b",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "7dfba8e0",
+                  "fields": [
+                    {
+                      "name": "loan_count",
+                      "expression": "`loan_count`"
+                    },
+                    {
+                      "name": "kualitas_ojk_bulan_ini",
+                      "expression": "`kualitas_ojk_bulan_ini`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "title": "Portfolio Quality Distribution by OJK Rating",
+                "showTitle": true
+              },
+              "widgetType": "pie",
+              "encodings": {
+                "angle": {
+                  "fieldName": "loan_count",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "Number of Loans"
+                },
+                "color": {
+                  "fieldName": "kualitas_ojk_bulan_ini",
+                  "legend": {
+                    "position": "right"
+                  },
+                  "displayName": "OJK Quality Rating",
+                  "scale": {
+                    "type": "categorical",
+                    "mappings": [
+                      {
+                        "value": "1. Lancar",
+                        "color": "#00A972"
+                      },
+                      {
+                        "value": "2. Dalam Perhatian Khusus",
+                        "color": "#FFAB00"
+                      },
+                      {
+                        "value": "3. Kurang Lancar",
+                        "color": "#FCA4A1"
+                      },
+                      {
+                        "value": "4. Diragukan",
+                        "color": "#AB4057"
+                      },
+                      {
+                        "value": "5. Macet",
+                        "color": "#FF3621"
+                      }
+                    ],
+                    "sort": {
+                      "by": "custom-order",
+                      "orderedValues": [
+                        "1. Lancar",
+                        "2. Dalam Perhatian Khusus",
+                        "3. Kurang Lancar",
+                        "4. Diragukan",
+                        "5. Macet"
+                      ]
+                    }
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 8,
+            "y": 6,
+            "width": 4,
+            "height": 5
+          }
+        },
+        {
+          "widget": {
+            "name": "665459d7",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "8abdbdbc",
+                  "fields": [
+                    {
+                      "name": "metric",
+                      "expression": "`metric`"
+                    },
+                    {
+                      "name": "sum(value)",
+                      "expression": "SUM(`value`)"
+                    },
+                    {
+                      "name": "unit",
+                      "expression": "`unit`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "rowsPerPage": 10,
+              "frame": {
+                "title": "Key Portfolio Metrics Summary",
+                "showTitle": true
+              },
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "metric",
+                    "format": {
+                      "type": "number-plain",
+                      "abbreviation": "none",
+                      "decimalPlaces": {
+                        "type": "exact",
+                        "places": 0
+                      }
+                    },
+                    "displayName": "Metric"
+                  },
+                  {
+                    "fieldName": "sum(value)",
+                    "format": {
+                      "type": "number-plain",
+                      "abbreviation": "none",
+                      "decimalPlaces": {
+                        "type": "exact",
+                        "places": 0
+                      }
+                    },
+                    "displayName": "Value"
+                  },
+                  {
+                    "fieldName": "unit",
+                    "format": {
+                      "type": "number-plain",
+                      "abbreviation": "none",
+                      "decimalPlaces": {
+                        "type": "exact",
+                        "places": 0
+                      }
+                    },
+                    "displayName": "Unit"
+                  }
+                ]
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 1,
+            "width": 5,
+            "height": 5
+          }
+        },
+        {
+          "widget": {
+            "name": "1232bc14",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "8a1bce2a",
+                  "fields": [
+                    {
+                      "name": "count(*)",
+                      "expression": "COUNT(`*`)"
+                    },
+                    {
+                      "name": "disbursement_month",
+                      "expression": "`disbursement_month`"
+                    },
+                    {
+                      "name": "total_disbursed",
+                      "expression": "`total_disbursed`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "title": "Monthly Disbursement Trends",
+                "showTitle": true
+              },
+              "mark": {
+                "marker": {
+                  "shape": "circle"
+                }
+              },
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "disbursement_month",
+                  "displayName": "Month",
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "fieldName": "total_disbursed",
+                  "format": {
+                    "type": "number-currency",
+                    "currencyCode": "IDR",
+                    "abbreviation": "compact",
+                    "decimalPlaces": {
+                      "type": "exact",
+                      "places": 1
+                    }
+                  },
+                  "displayName": "Total Disbursed",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "size": {
+                  "fieldName": "count(*)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "label": {
+                  "show": false
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 6,
+            "width": 8,
+            "height": 5
+          }
+        },
+        {
+          "widget": {
+            "name": "fb3762c1",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "123f175a",
+                  "fields": [
+                    {
+                      "name": "loan_cycle",
+                      "expression": "`loan_cycle`"
+                    },
+                    {
+                      "name": "par_rate",
+                      "expression": "`par_rate`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "title": "Loan Performance by Cycle",
+                "showTitle": true
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "loan_cycle",
+                  "displayName": "Loan Cycle",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "custom-order",
+                      "orderedValues": [
+                        1,
+                        2,
+                        3,
+                        4
+                      ]
+                    }
+                  }
+                },
+                "y": {
+                  "fieldName": "par_rate",
+                  "format": {
+                    "type": "number-plain",
+                    "abbreviation": "none",
+                    "decimalPlaces": {
+                      "type": "exact",
+                      "places": 1
+                    }
+                  },
+                  "formatTemplate": "{{@}}%",
+                  "displayName": "PAR Rate (%)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 11,
+            "width": 12,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "99cf25a0",
+            "queries": [
+              {
+                "name": "dashboards/01f181b3ff2e1b8abc77902487cc7fb7/datasets/01f181ba8ce01402a34e332ae6eb2118_dpd_bucket",
+                "query": {
+                  "datasetName": "dcf59d71",
+                  "fields": [
+                    {
+                      "name": "dpd_bucket",
+                      "expression": "`dpd_bucket`"
+                    },
+                    {
+                      "name": "dpd_bucket_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": "DPD per Bucket"
+              },
+              "widgetType": "filter-single-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "dpd_bucket",
+                    "queryName": "dashboards/01f181b3ff2e1b8abc77902487cc7fb7/datasets/01f181ba8ce01402a34e332ae6eb2118_dpd_bucket"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 4,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "4630078a",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "8bbd1fce",
+                  "fields": [
+                    {
+                      "name": "loan_count",
+                      "expression": "`loan_count`"
+                    },
+                    {
+                      "name": "dpd_bucket",
+                      "expression": "`dpd_bucket`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "title": "Loan Distribution by Days Past Due (DPD)",
+                "showTitle": true
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "loan_count",
+                  "format": {
+                    "type": "number-plain",
+                    "abbreviation": "none"
+                  },
+                  "displayName": "Number of Loans",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "dpd_bucket",
+                  "displayName": "DPD Category",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "custom-order",
+                      "orderedValues": [
+                        "Current",
+                        "1-30 DPD",
+                        "31-90 DPD",
+                        "90+ DPD"
+                      ]
+                    }
+                  }
+                },
+                "color": {
+                  "fieldName": "dpd_bucket",
+                  "legend": {
+                    "hide": true
+                  },
+                  "displayName": "DPD Category",
+                  "scale": {
+                    "type": "categorical",
+                    "mappings": [
+                      {
+                        "value": "Current",
+                        "color": "#00A972"
+                      },
+                      {
+                        "value": "1-30 DPD",
+                        "color": "#FFAB00"
+                      },
+                      {
+                        "value": "31-90 DPD",
+                        "color": "#FCA4A1"
+                      },
+                      {
+                        "value": "90+ DPD",
+                        "color": "#FF3621"
+                      }
+                    ],
+                    "sort": {
+                      "by": "custom-order",
+                      "orderedValues": [
+                        "Current",
+                        "1-30 DPD",
+                        "31-90 DPD",
+                        "90+ DPD"
+                      ]
+                    }
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 5,
+            "y": 1,
+            "width": 7,
+            "height": 5
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    },
+    {
+      "name": "d061c4f3",
+      "displayName": "Global Filters",
+      "layout": [
+        {
+          "widget": {
+            "name": "ca47c176",
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-single-select",
+              "encodings": {},
+              "frame": {
+                "showTitle": true
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 2
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_GLOBAL_FILTERS",
+      "layoutVersion": "GRID_V1"
+    },
+    {
+      "name": "f5f574ea",
+      "displayName": "Untitled page",
+      "pageType": "PAGE_TYPE_CANVAS"
+    }
+  ],
+  "uiSettings": {
+    "theme": {
+      "widgetHeaderAlignment": "ALIGNMENT_UNSPECIFIED"
+    },
+    "applyModeEnabled": false
+  }
+}
